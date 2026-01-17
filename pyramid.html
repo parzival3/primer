@@ -137,7 +137,7 @@
                 <button id="togglePrimes" class="active">Show Primes</button>
             </div>
             <div class="control-section">
-                <h3>Highlight Divisors (Long press to choose color)</h3>
+                <h3>Highlight Divisors (Click to choose color)</h3>
                 <div class="button-group" style="flex-direction: column; gap: 5px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <button class="divisor-btn" data-divisor="2">Divisible by 2</button>
@@ -247,49 +247,24 @@
                 updatePyramidVisibility();
             });
 
-            // Divisor buttons with long press for color picker
+            // Divisor buttons - click to choose color or deselect
             document.querySelectorAll('.divisor-btn').forEach(btn => {
-                // Click to toggle highlighting
                 btn.addEventListener('click', function() {
                     const divisor = parseInt(this.dataset.divisor);
+                    currentDivisorBtn = this;
+                    
                     if (divisorColors[divisor]) {
-                        // Remove highlighting
+                        // Already selected - deselect it
                         delete divisorColors[divisor];
                         this.classList.remove('active');
                         this.style.backgroundColor = '';
                         this.style.color = '';
+                        updatePyramidVisibility();
                     } else {
-                        // Add highlighting with default color
-                        divisorColors[divisor] = '#00ff00';
-                        this.classList.add('active');
-                        this.style.backgroundColor = '#00ff00';
-                        this.style.color = '#000';
-                    }
-                    updatePyramidVisibility();
-                });
-                
-                // Long press to choose color
-                btn.addEventListener('mousedown', function(e) {
-                    currentDivisorBtn = this;
-                    longPressTimer = setTimeout(() => {
-                        const divisor = parseInt(this.dataset.divisor);
+                        // Not selected - open color picker
                         const colorPicker = document.getElementById('colorPicker');
-                        colorPicker.value = divisorColors[divisor] || '#00ff00';
+                        colorPicker.value = '#00ff00';
                         colorPicker.click();
-                    }, 500); // 500ms for long press
-                });
-                
-                btn.addEventListener('mouseup', function() {
-                    if (longPressTimer) {
-                        clearTimeout(longPressTimer);
-                        longPressTimer = null;
-                    }
-                });
-                
-                btn.addEventListener('mouseleave', function() {
-                    if (longPressTimer) {
-                        clearTimeout(longPressTimer);
-                        longPressTimer = null;
                     }
                 });
             });
