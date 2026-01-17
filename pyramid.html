@@ -109,10 +109,28 @@
             </div>
             <div class="control-section">
                 <h3>Highlight Divisors (Long press to choose color)</h3>
-                <div class="button-group">
-                    <button class="divisor-btn" data-divisor="3">Divisible by 3</button>
-                    <button class="divisor-btn" data-divisor="5">Divisible by 5</button>
-                    <button class="divisor-btn" data-divisor="7">Divisible by 7</button>
+                <div class="button-group" style="flex-direction: column; gap: 5px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="divisor-btn" data-divisor="3">Divisible by 3</button>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" class="hide-checkbox" data-divisor="3">
+                            <span>Hide</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="divisor-btn" data-divisor="5">Divisible by 5</button>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" class="hide-checkbox" data-divisor="5">
+                            <span>Hide</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="divisor-btn" data-divisor="7">Divisible by 7</button>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" class="hide-checkbox" data-divisor="7">
+                            <span>Hide</span>
+                        </label>
+                    </div>
                 </div>
             </div>
             <input type="color" id="colorPicker" style="display: none;" value="#00ff00">
@@ -137,6 +155,7 @@
         let database = null;
         let showPrimes = true;
         let divisorColors = {}; // Map divisors to their highlight colors
+        let hiddenDivisors = new Set(); // Set of divisors to hide
         let zoomLevel = 100; // Zoom percentage
         let longPressTimer = null;
         let currentDivisorBtn = null;
@@ -223,6 +242,19 @@
                     updatePyramidVisibility();
                 }
             });
+            
+            // Hide checkboxes
+            document.querySelectorAll('.hide-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const divisor = parseInt(this.dataset.divisor);
+                    if (this.checked) {
+                        hiddenDivisors.add(divisor);
+                    } else {
+                        hiddenDivisors.delete(divisor);
+                    }
+                    updatePyramidVisibility();
+                });
+            });
 
             // Zoom controls
             document.getElementById('zoomIn').addEventListener('click', function() {
@@ -299,18 +331,34 @@
                 span.style.backgroundColor = '';
                 span.classList.remove('hidden');
                 
-                // Apply divisor colors (last one wins if multiple match)
-                for (let divisor in divisorColors) {
+                // Check if number should be hidden by checkbox
+                let shouldHide = false;
+                for (let divisor of hiddenDivisors) {
                     if (num % divisor === 0) {
-                        span.style.backgroundColor = divisorColors[divisor];
+                        shouldHide = true;
+                        break;
+                    }
+                }
+                
+                // Apply divisor colors (last one wins if multiple match)
+                if (!shouldHide) {
+                    for (let divisor in divisorColors) {
+                        if (num % divisor === 0) {
+                            span.style.backgroundColor = divisorColors[divisor];
+                        }
                     }
                 }
                 
                 // Restore prime highlighting if enabled and no divisor color applied
-                if (numData.is_prime && !span.style.backgroundColor) {
+                if (numData.is_prime && !span.style.backgroundColor && !shouldHide) {
                     span.classList.add('prime');
                 } else if (!numData.is_prime || span.style.backgroundColor) {
                     span.classList.remove('prime');
+                }
+                
+                // Hide if checkbox is checked for a divisor
+                if (shouldHide) {
+                    span.classList.add('hidden');
                 }
                 
                 // If it's prime and we're hiding primes, hide it
