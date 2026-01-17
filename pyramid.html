@@ -84,6 +84,35 @@
             transition: opacity 0.3s;
             text-align: center;
             box-sizing: border-box;
+            position: relative;
+            cursor: pointer;
+        }
+        .number:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 12px;
+            z-index: 1000;
+            margin-bottom: 5px;
+            pointer-events: none;
+        }
+        .number:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: #333;
+            margin-bottom: -5px;
+            pointer-events: none;
         }
         .number.prime {
             background-color: #ffeb3b;
@@ -329,6 +358,13 @@
                     span.className = 'number';
                     span.dataset.number = number;
                     span.textContent = number;
+                    
+                    // Add tooltip with divisors
+                    if (numData) {
+                        const divisorsList = numData.divisors.join(', ');
+                        const primeLabel = numData.is_prime ? ' (Prime)' : '';
+                        span.dataset.tooltip = `Divisors: ${divisorsList}${primeLabel}`;
+                    }
                     
                     if (numData && numData.is_prime) {
                         span.classList.add('prime');
