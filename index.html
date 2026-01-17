@@ -127,6 +127,26 @@
             padding: 40px;
             font-size: 18px;
         }
+        .floating-zoom {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1001;
+        }
+        .floating-zoom h4 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+        .floating-zoom .button-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -214,6 +234,17 @@
             </div>
         </div>
     </div>
+    
+    <!-- Floating Zoom Controls -->
+    <div class="floating-zoom">
+        <h4>Zoom</h4>
+        <div class="button-group">
+            <button id="zoomOutFloat">-</button>
+            <span id="zoomLevelFloat" style="min-width: 50px; text-align: center; font-weight: bold;">100%</span>
+            <button id="zoomInFloat">+</button>
+            <button id="zoomResetFloat" style="margin-left: 5px;">Reset</button>
+        </div>
+    </div>
 
     <script>
         let database = null;
@@ -295,7 +326,7 @@
                 });
             });
 
-            // Zoom controls
+            // Zoom controls (top)
             document.getElementById('zoomIn').addEventListener('click', function() {
                 zoomLevel = Math.min(200, zoomLevel + 10);
                 updateZoom();
@@ -307,6 +338,22 @@
             });
 
             document.getElementById('zoomReset').addEventListener('click', function() {
+                zoomLevel = 100;
+                updateZoom();
+            });
+            
+            // Floating zoom controls (bottom right)
+            document.getElementById('zoomInFloat').addEventListener('click', function() {
+                zoomLevel = Math.min(200, zoomLevel + 10);
+                updateZoom();
+            });
+
+            document.getElementById('zoomOutFloat').addEventListener('click', function() {
+                zoomLevel = Math.max(20, zoomLevel - 10);
+                updateZoom();
+            });
+
+            document.getElementById('zoomResetFloat').addEventListener('click', function() {
                 zoomLevel = 100;
                 updateZoom();
             });
@@ -417,7 +464,10 @@
         function updateZoom() {
             const pyramidInner = document.getElementById('pyramid');
             pyramidInner.style.transform = `scale(${zoomLevel / 100})`;
+            
+            // Update both zoom level displays
             document.getElementById('zoomLevel').textContent = zoomLevel + '%';
+            document.getElementById('zoomLevelFloat').textContent = zoomLevel + '%';
             
             // Recenter after zoom
             setTimeout(centerPyramid, 100);
